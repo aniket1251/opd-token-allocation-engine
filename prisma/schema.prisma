@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Doctor model
+model Doctor {
+  id             String   @id @default(uuid())
+  name           String
+  displayID      String   @unique // Human-readable ID (e.g., AKG001)
+  specialization String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  slots Slot[]
+
+  @@index([isActive])
+  @@map("doctors")
+}
+
+// Time slot model with capacity management
+model Slot {
+  id          String   @id @default(uuid())
+  displayID   String   @unique // Human-readable ID (e.g., S-AKG001-20260201-001)
+  doctorId    String
+  date        DateTime @db.Date
+  startTime   String // Format: "09:00"
+  endTime     String // Format: "10:00"
+  capacity    Int // Maximum patients per slot
+  paidCap     Int? // Optional cap for paid priority patients
+  followUpCap Int? // Optional cap for follow up patients
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  doctor Doctor  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  tokens Token[]
+
+  @@unique([doctorId, date, startTime])
+  @@index([doctorId, date, isActive])
+  @@index([date, isActive])
+  @@map("slots")
+}
+
+// Token priority enum
+enum Priority {
+  EMERGENCY // Highest priority
+  PAID // Paid priority patients
+  FOLLOWUP // Follow-up patients
+  ONLINE // Online booking
+  WALKIN // Walk-in patients (lowest priority)
+}
+
+// Token source enum
+enum Source {
+  WALKIN
+  ONLINE
+}
+
+// Token status enum
+enum TokenStatus {
+  WAITING // In queue, not assigned to slot yet
+  ALLOCATED // Assigned to a specific slot
+  COMPLETED // Patient was seen
+  CANCELLED // Cancelled by patient or system
+  NO_SHOW // Patient didn't show up
+  EXPIRED // End of day, not served
+}
+
+// Token model
+model Token {
+  id             String      @id @default(uuid())
+  displayID      String      @unique // Human-readable ID (e.g., T-AKG001-20260201-001)
+  patientName    String
+  patientPhone   String?
+  patientAge     Int?
+  source         Source // Where the token came from
+  priority       Priority    @default(WALKIN)
+  status         TokenStatus @default(WAITING)
+  slotId         String? // null if waiting
+  doctorId       String // Always know which doctor
+  date           DateTime    @db.Date
+  idempotencyKey String      @unique // Prevent duplicate bookings
+  notes          String? // For follow-up or emergency details
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  allocatedAt    DateTime? // When assigned to slot
+  completedAt    DateTime? // When marked complete
+  cancelledAt    DateTime? // When token was cancelled
+
+  slot Slot? @relation(fields: [slotId], references: [id], onDelete: SetNull)
+
+  @@index([doctorId, date, status])
+  @@index([slotId, status])
+  @@index([status, priority])
+  @@index([date, status])
+  @@index([idempotencyKey])
+  @@map("tokens")
+}
+
+// Audit log for tracking all operations
+model AuditLog {
+  id        String   @id @default(uuid())
+  operation String // "ALLOCATE", "CANCEL", "REALLOCATE", "NO_SHOW", etc.
+  tokenId   String?
+  slotId    String?
+  doctorId  String?
+  details   Json? // Store additional context
+  timestamp DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([operation, timestamp])
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// DESIGN NOTES
+// ============================================================================
+// 1. Patient info stored in Token (no separate table - simpler for assignment)
+// 2. DoctorConfig allows per-doctor caps (prevents paid priority abuse)
+// 3. Indexes optimized for allocation queries
+// 4. Slot deletion sets token.slotId to null (safe handling)
+// 5. All timestamps for basic auditing
+// 6. Idempotency handled in application layer (in-memory cache)
