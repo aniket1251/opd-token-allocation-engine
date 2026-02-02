@@ -82,7 +82,7 @@ Test the complete system with a realistic OPD day scenario:
 npm run simulate
 ```
 
-This demonstrates all features including emergencies, cancellations, reallocation, and edge cases with 10 doctors and multiple patient scenarios.
+This demonstrates all features including emergencies, cancellations, reallocation, and edge cases with 6 doctors and multiple patient scenarios.
 
 **📖 Complete Simulation Results:** See **[SimulationResults.pdf](https://drive.google.com/file/d/1hYJNr1_GCbmAhmwI8Jt47FnSgxOtgViH/view?usp=sharing)**
 
@@ -169,7 +169,7 @@ This project is created for educational purposes.
 
 - **[Api_documentation.md](ApiDocs.md)** — Complete API reference with request/response examples for all 18 endpoints
 - **[Documentation.md](Documentation.md)** — Technical architecture, design principles, trade-offs, and edge case handling
-- **[SimulationResults.pdf](https://drive.google.com/file/d/1hYJNr1_GCbmAhmwI8Jt47FnSgxOtgViH/view?usp=sharing)** — Comprehensive real world Simulation of 1 day at OPD with 10 doctors and edge case handling
+- **[SimulationResults.pdf](https://drive.google.com/file/d/1hYJNr1_GCbmAhmwI8Jt47FnSgxOtgViH/view?usp=sharing)** — Comprehensive real world Simulation of 1 day at OPD with 6 doctors and edge case handling
 
 ---
 
