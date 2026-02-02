@@ -30,7 +30,7 @@ A production-ready hospital outpatient department (OPD) token management system 
 ### 1. Clone and Install
 
 ```bash
-git clone <repository-url>
+git clone <https://github.com/aniket1251/opd-token-allocation-engine.git>
 cd opd-token-allocation-engine
 npm install
 ```
@@ -82,7 +82,9 @@ Test the complete system with a realistic OPD day scenario:
 npm run simulate
 ```
 
-This demonstrates all features including emergencies, cancellations, reallocation, and edge cases with 3 doctors and multiple patient scenarios.
+This demonstrates all features including emergencies, cancellations, reallocation, and edge cases with 10 doctors and multiple patient scenarios.
+
+**📖 Complete Simulation Results:** See **[SimulationResults.pdf](https://drive.google.com/file/d/1hYJNr1_GCbmAhmwI8Jt47FnSgxOtgViH/view?usp=sharing)**
 
 ## Project Structure
 
